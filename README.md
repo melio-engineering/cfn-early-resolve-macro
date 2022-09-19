@@ -4,13 +4,14 @@ EarlyResolve Macro
 Performs an "early resolve" instead of the built-in dynamic `resolve`. It runs on the template compilation and replaces
 the relevant values. Skip to [early resolve vs dynamic resolve](#difference-from-current-dynamic-resolve)
 
-Example usage
--------------
+Usage
+-----
 
-1. Add the Macro in a "Transform"
-2. Place `{{early-resolve:ssm:...}}` anywhere in the template.
-3. Optionally reference template parameters, see "${Environment}" in the example. This is similar to `!Sub` directive.
-4. Create/update the stack.
+1. Create the stack from `early-resolve.template.json`.
+2. Add the Macro in a "Transform"
+3. Place `{{early-resolve:ssm:...}}` anywhere in the template.
+4. Optionally reference template parameters, see "${Environment}" in the example. This is similar to `!Sub` directive.
+5. Create/update the stack.
 
 ```yaml
 Transform:
