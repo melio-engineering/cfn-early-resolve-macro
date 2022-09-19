@@ -18,7 +18,7 @@ const template = {
         "Properties": {
           "SimpleResolve": "{{early-resolve:ssm:/${Environment}/infra/sample-resolve}}",
           "ArrayResolve": [
-            "partially-{{early-resolve:ssm:/${Environment}/infra/eventbus-arn}}"
+            "partially-{{early-resolve:ssm:/${Environment}/infra/resource-arn}}"
           ],
           "ArrayMultiResolve": [
             {
@@ -34,12 +34,12 @@ const template = {
       }
     }
   },
-  "transformId": "487079708012::EarlyResolve",
+  "transformId": "1234567890::EarlyResolve",
   "requestId": "b7af92d7-d0fd-4fb7-a5b5-614deb2c36be",
   "region": "eu-central-1",
   "params": {},
   "templateParameterValues": {
-    "Environment": "or-cohen"
+    "Environment": "sample-environment"
   }
 };
 
