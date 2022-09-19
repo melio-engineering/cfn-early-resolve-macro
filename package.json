@@ -1,0 +1,15 @@
+{
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node test.js"
+  },
+  "dependencies": {
+    "minify": "^9.1.0"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.1196.0"
+  },
+  "engines": {
+    "node": "^16"
+  }
+}

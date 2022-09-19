@@ -1,0 +1,42 @@
+{
+  "Transform": "AWS::Serverless-2016-10-31",
+  "Resources": {
+    "Transformer": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "index.handler",
+        "Runtime": "nodejs14.x",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Policies": [
+          {
+            "SSMParameterReadPolicy": {
+              "ParameterName": "*"
+            }
+          }
+        ],
+        "InlineCode": "const AWS=require(\"aws-sdk\"),ssm=new AWS.SSM;let ssmCache;const asyncStringReplace=async(e,s,a)=>{const t=[];let r,n=0;for(;null!==(r=s.exec(e));)t.push(e.slice(n,r.index)),t.push(await a(...r)),n=s.lastIndex;return t.push(e.slice(n)),t.join(\"\")};function replaceParams(e,s){let a=e;for(const[e,t]of Object.entries(s))a=a.replace(`\\${${e}}`,t);return a}async function getSSMParameter(e){if(e in ssmCache)console.log(\"Using cached parameter\",e);else{let s;if(process.env.TEST)s=\"mocked\";else{s=(await ssm.getParameter({Name:e,WithDecryption:!0}).promise()).Parameter.Value}ssmCache[e]=s}return ssmCache[e]}async function deepReplace(e,s){if(null===e||\"boolean\"==typeof e||\"number\"==typeof e)return e;if(\"string\"==typeof e)return await asyncStringReplace(e,/\\{\\{early-resolve:ssm:(.*?)\\}\\}/g,(async(e,a)=>{const t=replaceParams(a,s);return console.log(\"Resolving parameter:\",e,a,t),getSSMParameter(t)}));if(\"object\"==typeof e){for(const a in e)e[a]=await deepReplace(e[a],s);return e}return e}exports.handler=async(e,s)=>{ssmCache={},console.log(\"Parsing event:\",JSON.stringify(e));const a=e.fragment||{},t=e.templateParameterValues||{},r=await deepReplace(a,t);return{requestId:e.requestId,status:\"success\",fragment:r}};"
+      }
+    },
+    "Macro": {
+      "Type": "AWS::CloudFormation::Macro",
+      "Properties": {
+        "Description": "Provides transform-time resolving of SSM parameters",
+        "FunctionName": {
+          "Ref": "Transformer"
+        },
+        "Name": "EarlyResolve"
+      }
+    },
+    "MacroPermission": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Ref": "Transformer"
+        },
+        "Principal": "cloudformation.amazonaws.com"
+      }
+    }
+  }
+}
