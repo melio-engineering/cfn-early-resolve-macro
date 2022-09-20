@@ -2,7 +2,7 @@ EarlyResolve Macro
 ==================
 
 Performs an "early resolve" instead of the built-in dynamic `resolve`. It runs on the template compilation and replaces
-the relevant values. Skip to [early resolve vs dynamic resolve](#difference-from-current-dynamic-resolve)
+the relevant values. Skip to [early resolve vs dynamic resolve](#difference-from-current-dynamic-resolve) to read more.
 
 Usage
 -----
