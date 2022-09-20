@@ -11,7 +11,7 @@ Usage
 2. Add the Macro in a "Transform" in your own CloudFormation template.
 3. Place `{{early-resolve:ssm:...}}` anywhere in the template.
 4. Optionally reference template parameters, see "${Environment}" in the example. This is similar to `!Sub` directive.
-5. Create/update the stack.
+5. Create/update your stack.
 
 ```yaml
 Transform:
