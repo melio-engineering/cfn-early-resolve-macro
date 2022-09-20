@@ -3,7 +3,7 @@ const { handler } = require('./early-resolve');
 process.env.TEST = true;
 
 const template = {
-  "accountId": "487079708012",
+  "accountId": "1234567890",
   "fragment": {
     "AWSTemplateFormatVersion": "2010-09-09",
     "Description": "early-resolve-test",
