@@ -29,6 +29,23 @@ Resources:
       PropKey: "{{early-resolve:ssm:/${Environment}/infra/vpc-id}}"
 ```
 
+Supported resolvers
+-------------------
+
+There is only one supported resolver in here which resolves SSM (Parameter Store) parameters.
+
+```
+{{early-resolve:ssm:<path-to-param>}}
+```
+
+Where `<path-to-param>` can mix strings and template parameter references, for example:
+
+```
+{{early-resolve:ssm:/path/${AnyParameter}/value}}
+```
+
+The parameter replacement happens in this Macro, hence you do not need to `!Sub` it.
+
 Building
 --------
 
