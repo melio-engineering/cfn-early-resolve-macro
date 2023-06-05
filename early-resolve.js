@@ -31,14 +31,19 @@ async function getSSMParameter(parameter) {
     console.log('Using cached parameter', parameter);
   } else {
     let ret;
-    if (process.env.TEST) {
-      ret = 'mocked';
-    } else {
-      const param = await ssm.getParameter({
-        Name: parameter,
-        WithDecryption: true
-      }).promise();
-      ret = param.Parameter.Value;
+    try {
+      if (process.env.TEST) {
+        ret = 'mocked';
+      } else {
+        const param = await ssm.getParameter({
+          Name: parameter,
+          WithDecryption: true
+        }).promise();
+        ret = param.Parameter.Value;
+      }
+    } catch (e) {
+      console.error(e);
+      throw new Error(`Failed to resolve param: ${parameter}`);
     }
     ssmCache[parameter] = ret;
   }
@@ -70,16 +75,25 @@ async function deepReplace(object, params) {
 }
 
 exports.handler = async (event, context) => {
-  ssmCache = {};
+  try {
+    ssmCache = {};
 
-  console.log("Parsing event:", JSON.stringify(event));
-  const template = event["fragment"] || {};
-  const params = event["templateParameterValues"] || {};
-  const resolvedTemplate = await deepReplace(template, params);
+    console.log("Parsing event:", JSON.stringify(event));
+    const template = event["fragment"] || {};
+    const params = event["templateParameterValues"] || {};
+    const resolvedTemplate = await deepReplace(template, params);
 
-  return {
-    requestId: event["requestId"],
-    status: "success",
-    fragment: resolvedTemplate,
+    return {
+      requestId: event["requestId"],
+      status: "success",
+      fragment: resolvedTemplate,
+    }
+  } catch (e) {
+    console.error(e);
+    return {
+      requestId: event["requestId"],
+      status: "failure",
+      errorMessage: e.message,
+    }
   }
 }
