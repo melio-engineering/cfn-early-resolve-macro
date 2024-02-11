@@ -1,3 +1,4 @@
+const { strict: assert } = require('assert');
 const { handler } = require('./early-resolve');
 
 process.env.TEST = true;
@@ -17,6 +18,8 @@ const template = {
         "Type": "AWS::None::Resource",
         "Properties": {
           "SimpleResolve": "{{early-resolve:ssm:/${Environment}/infra/sample-resolve}}",
+          "DefaultResolve": "{{early-resolve-with-default:ssm:/${Environment}/infra/default-resolve|default}}",
+          "DefaultResolveEmpty": "{{early-resolve-with-default:ssm:/${Environment}/infra/default-resolve}}",
           "ArrayResolve": [
             "partially-{{early-resolve:ssm:/${Environment}/infra/resource-arn}}"
           ],
@@ -45,8 +48,10 @@ const template = {
 
 // Handle a duplicated object so that we can compare
 handler(JSON.parse(JSON.stringify(template)), {}).then((result) => {
-  console.assert(result.fragment.Resources.SampleResource.Properties.SimpleResolve === 'mocked', 'Failed to resolve SimpleValue');
-  console.assert(result.fragment.Resources.SampleResource.Properties.ArrayResolve[0] === 'partially-mocked', 'Failed to resolve array');
-  console.assert(result.fragment.Resources.SampleResource.Properties.ArrayMultiResolve[0].Value === 'multi-key-1-mocked', 'Failed to resolve multi array 1');
-  console.assert(result.fragment.Resources.SampleResource.Properties.ArrayMultiResolve[1].Value === 'multi-key-2-mocked', 'Failed to resolve multi array 2');
+  assert(result.fragment.Resources.SampleResource.Properties.SimpleResolve === 'mocked', 'Failed to resolve SimpleValue');
+  assert(result.fragment.Resources.SampleResource.Properties.DefaultResolve === 'default', 'Failed to resolve default value');
+  assert(result.fragment.Resources.SampleResource.Properties.DefaultResolveEmpty === '', 'Failed to resolve default empty value');
+  assert(result.fragment.Resources.SampleResource.Properties.ArrayResolve[0] === 'partially-mocked', 'Failed to resolve array');
+  assert(result.fragment.Resources.SampleResource.Properties.ArrayMultiResolve[0].Value === 'multi-key-1-mocked', 'Failed to resolve multi array 1');
+  assert(result.fragment.Resources.SampleResource.Properties.ArrayMultiResolve[1].Value === 'multi-key-2-mocked', 'Failed to resolve multi array 2');
 });
