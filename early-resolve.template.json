@@ -5,7 +5,7 @@
       "Type": "AWS::Serverless::Function",
       "Properties": {
         "Handler": "index.handler",
-        "Runtime": "nodejs14.x",
+        "Runtime": "nodejs20.x",
         "MemorySize": 256,
         "Timeout": 30,
         "Policies": [
