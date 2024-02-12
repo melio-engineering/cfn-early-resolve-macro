@@ -56,7 +56,7 @@ if the parameter is not found.
 There are two forms of default value fallback. The first one is a simple string:
 
 ```
-{{early-resolve-with-default:ssm:/path/to/param:default-value}}
+{{early-resolve-with-default:ssm:/path/to/param|default-value}}
 ```
 
 The second one is simply an empty value, which will translate to an empty string:
