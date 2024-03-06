@@ -1,0 +1,20 @@
+# This is an empty template to perform a real-world test in CloudFormation
+# If you wish to run this, you will need to replace the resolved parameter values with your own
+# The template is set to "Output" the values, and will have no resources
+
+Transform:
+  - EarlyResolve
+
+Conditions:
+  FalseCondition: !Equals [true, false]
+
+Resources:
+  NoResource:
+    Type: Custom::NoResource
+    Condition: FalseCondition
+
+Outputs:
+  Resolved:
+    Value: "{{early-resolve:ssm:/path/to/parameter}}"
+  ResolvedDefault:
+    Value: "{{early-resolve-with-default:ssm:/path/to/parameter|default-ok}}"
