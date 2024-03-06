@@ -1,5 +1,6 @@
 const { SSMClient, GetParameterCommand } = require('@aws-sdk/client-ssm');
 
+const client = new SSMClient();
 let ssmCache;
 
 // A slightly modified version of https://dev.to/ycmjason/stringprototypereplace-asynchronously-28k9
@@ -34,12 +35,10 @@ async function getSSMParameter(parameter) {
       if (process.env.TEST) {
         ret = 'mocked';
       } else {
-        const client = new SSMClient();
-        const cmd = new GetParameterCommand({
+        const rsp = await client.send(new GetParameterCommand({
           Name: parameter,
           WithDecryption: true
-        });
-        const rsp = await client.send(cmd);
+        }));
         ret = rsp.Parameter.Value;
       }
     } catch (e) {
