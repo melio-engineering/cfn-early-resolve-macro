@@ -46,6 +46,28 @@ Where `<path-to-param>` can mix strings and template parameter references, for e
 
 The parameter replacement happens in this Macro, hence you do not need to `!Sub` it.
 
+Default value fallback
+----------------------
+
+You can opt-in to a default value if the parameter is not found in the SSM. This is useful for development environments
+where you don't have the same infrastructure as in production, or in cases where you allow some graceful fallback even
+if the parameter is not found.
+
+There are two forms of default value fallback. The first one is a simple string:
+
+```
+{{early-resolve-with-default:ssm:/path/to/param|default-value}}
+```
+
+The second one is simply an empty value, which will translate to an empty string:
+
+```
+{{early-resolve-with-default:ssm:/path/to/param}}
+```
+
+The reason we chose a different directive is to avoid confusion with the `{{early-resolve:ssm:...}}` directive. This
+way, you can easily see that the parameter has a default value.
+
 Building
 --------
 

@@ -3,6 +3,8 @@ const { SSMClient, GetParameterCommand } = require('@aws-sdk/client-ssm');
 const client = new SSMClient();
 let ssmCache;
 
+const replaceExpression = /\{\{(early-resolve|early-resolve-with-default):ssm:([^|]*)(\|(.*))?\}\}/g;
+
 // A slightly modified version of https://dev.to/ycmjason/stringprototypereplace-asynchronously-28k9
 // without the Promise.all to not parallelize the SSM calls.
 const asyncStringReplace = async (str, regex, aReplacer) => {
@@ -33,6 +35,9 @@ async function getSSMParameter(parameter) {
     let ret;
     try {
       if (process.env.TEST) {
+        if (parameter.includes('default-resolve')) {
+          throw new Error(`Could not find ${parameter} in SSM`);
+        }
         ret = 'mocked';
       } else {
         const rsp = await client.send(new GetParameterCommand({
@@ -42,7 +47,7 @@ async function getSSMParameter(parameter) {
         ret = rsp.Parameter.Value;
       }
     } catch (e) {
-      console.error(e);
+      console.warn(e);
       throw new Error(`Failed to resolve param: ${parameter}`);
     }
     ssmCache[parameter] = ret;
@@ -57,10 +62,17 @@ async function deepReplace(object, params) {
   }
 
   if (typeof object === 'string') {
-    return await asyncStringReplace(object, /\{\{early-resolve:ssm:(.*?)\}\}/g, async (match, ssmParameter) => {
-      const parameterName = replaceParams(ssmParameter, params);
-      console.log("Resolving parameter:", match, ssmParameter, parameterName);
-      return getSSMParameter(parameterName);
+    return await asyncStringReplace(object, replaceExpression, async (match, resolveType, ssmParameter, pipe, defaultValue) => {
+      try {
+        const parameterName = replaceParams(ssmParameter, params);
+        console.log("Resolving parameter:", match, ssmParameter, parameterName);
+        return await getSSMParameter(parameterName);
+      } catch (e) {
+        if (resolveType === 'early-resolve-with-default') {
+          return defaultValue || "";
+        }
+        throw e;
+      }
     });
   }
 
