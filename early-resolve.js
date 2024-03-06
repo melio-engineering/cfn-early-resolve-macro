@@ -1,6 +1,6 @@
-const AWS = require('aws-sdk');
+const { SSMClient, GetParameterCommand } = require('@aws-sdk/client-ssm');
 
-const ssm = new AWS.SSM();
+const client = new SSMClient();
 let ssmCache;
 
 const replaceExpression = /\{\{(early-resolve|early-resolve-with-default):ssm:([^|]*)(\|(.*))?\}\}/g;
@@ -40,11 +40,11 @@ async function getSSMParameter(parameter) {
         }
         ret = 'mocked';
       } else {
-        const param = await ssm.getParameter({
+        const rsp = await client.send(new GetParameterCommand({
           Name: parameter,
           WithDecryption: true
-        }).promise();
-        ret = param.Parameter.Value;
+        }));
+        ret = rsp.Parameter.Value;
       }
     } catch (e) {
       console.warn(e);
